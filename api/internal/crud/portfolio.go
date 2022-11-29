@@ -14,17 +14,55 @@ func Create(portfolio models.PortfolioDB) error {
 
 	}
 
-	conn.Exec(`	
+	_, err = conn.Exec(`	
 				INSERT INTO portfolios (chain_id) VALUES (?)
 	`, portfolio.ChainId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func Read(db *sqlx.DB, id int) models.PortfolioDB {
-	return models.PortfolioDB{}
+func Read(id int) models.PortfolioResponse {
+	conn, err := repositories.CreateConnection()
+	if err != nil {
+		log.Fatalln("Can't create connection with DB")
+	}
+
+	// Getting portfolio
+	portfolioResult := conn.QueryRowx(`
+		SELECT * FROM portfolios WHERE id = $1;
+	`, id)
+	var portfolioDB models.PortfolioDB
+	if portfolioResult != nil {
+		err = portfolioResult.StructScan(&portfolioDB)
+	}
+
+	// Getting tokens inside the portfolio
+	tokensResult, err := conn.Queryx(`
+					SELECT amount, address, symbol, price FROM tokens_addreses
+						WHERE portfolio_id = ?;
+	`, portfolioDB.Id)
+
+	var tokens []models.TokenInPortfolio
+
+	for tokensResult.Next() {
+		var token models.TokenInPortfolio
+		err = tokensResult.StructScan(&token)
+		tokens = append(tokens, token)
+	}
+
+	// Unite this
+	var portfolio models.PortfolioResponse
+	portfolio.Id = portfolioDB.Id
+	portfolio.ChainId = portfolioDB.ChainId
+	portfolio.Tokens = tokens
+
+	return portfolio
 }
 
-func ReadAll(db *sqlx.DB) []models.PortfolioDB {
+func ReadAll() []models.PortfolioDB {
 	return []models.PortfolioDB{}
 }
 
