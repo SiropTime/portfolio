@@ -2,13 +2,21 @@ package crud
 
 import (
 	"awesomeProject/api/internal/models"
+	"awesomeProject/api/pkg/repositories"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
-func Create(db *sqlx.DB, portfolio models.PortfolioDB) error {
-	db.Exec(`	
-				INSERT INTO portfolios () VALUES (??)
-	`)
+func Create(portfolio models.PortfolioDB) error {
+	conn, err := repositories.CreateConnection()
+	if err != nil {
+		log.Fatalln("Can't create connection with DB")
+
+	}
+
+	conn.Exec(`	
+				INSERT INTO portfolios (chain_id) VALUES (?)
+	`, portfolio.ChainId)
 	return nil
 }
 

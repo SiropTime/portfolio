@@ -1,26 +1,23 @@
 package models
 
-type Token struct {
-	Amount float32 `db:"amount"`
-	Name   string  `db:"name"`
+type PortfolioDB struct {
+	ChainId int `db:"chain_id"`
 }
 
-type PortfolioDB struct {
-	UserId string  `db:"user_id"`
-	Tokens []Token `db:"tokens"`
+type PortfolioResponse struct {
+	ChainId int `json:"chain_id"`
+	Tokens  []TokenInChain
+}
+
+type TokenInChain struct {
+	Address string `json:"address"`
+	Price   int64  `json:"price"`
 }
 
 var Schema = `
-	CREATE TABLE IF NOT EXISTS tokens (
-		id SERIAL PRIMARY KEY,
-		name VARCHAR(64),
-		amount float
-		);
-	
 	CREATE TABLE IF NOT EXISTS portfolios (
 	    id SERIAL PRIMARY KEY,
 	    user_id VARCHAR(64),
-	    tokens integer[]
-
-	)
+	    chain_id INTEGER
+	);
 `
