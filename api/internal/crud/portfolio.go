@@ -42,7 +42,7 @@ func Read(id int) models.PortfolioResponse {
 	// Getting tokens inside the portfolio
 	tokensResult, err := conn.Queryx(`
 					SELECT amount, address, symbol, price FROM tokens_addreses
-						WHERE portfolio_id = ?;
+						WHERE portfolio_id = $1;
 	`, portfolioDB.Id)
 
 	var tokens []models.TokenInPortfolio

@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"awesomeProject/api/internal/crud"
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/constants"
 	"encoding/json"
@@ -37,12 +38,19 @@ func getChains() models.ChainsList {
 }
 
 func GetPortfolio(c *fiber.Ctx) error {
-	body := getChains()
-	err := c.SendString(strconv.Itoa(body.Chains[0].ChainId))
+	//body := getChains()
+	//err := c.SendString(strconv.Itoa(body.Chains[0].ChainId))
+	pId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return err
 	}
-	return nil
+	portRes := crud.Read(pId)
+
+	if err != nil {
+		return err
+	}
+
+	return json.NewEncoder(c.Type("json", "utf-8").Response().BodyWriter()).Encode(portRes)
 }
 
 func PrepareTransaction(c *fiber.Ctx) {
