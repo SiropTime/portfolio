@@ -4,6 +4,7 @@ import (
 	"awesomeProject/api/internal/etc"
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
+	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"go/types"
 )
@@ -87,7 +88,7 @@ func Read(id int) (models.PortfolioResponse, error) {
 	if portfolioResult != nil {
 		err = portfolioResult.StructScan(&portfolioDB)
 	} else {
-		return models.PortfolioResponse{}, types.Error{Msg: "Can't create connection to DB"}
+		return models.PortfolioResponse{}, fiber.ErrNotFound
 	}
 
 	// Getting tokens inside the portfolio
@@ -168,7 +169,7 @@ func Update(portfolioId int, portfolio models.PortfolioInput) error {
 	return nil
 }
 
-func AddNewToken(portfolioId int, token models.TokenInput) error {
+func AddNewTokens(portfolioId int, tokens models.TokensInput) error {
 	// PATCH
 	conn, err := repositories.CreateConnection()
 	if err != nil {
@@ -180,17 +181,30 @@ func AddNewToken(portfolioId int, token models.TokenInput) error {
 	if err != nil {
 		return err
 	}
+	tokensList := tokens.Tokens
+	for _, token := range tokensList {
+		tokenAPI, err := getTokenDetails(portfolio.ChainId, token.Address)
+		if err != nil {
+			return err
+		}
 
-	tokenAPI, err := getTokenDetails(portfolio.ChainId, token.Address)
-	if err != nil {
-		return err
-	}
-
-	_, err = conn.Queryx(`
+		_, err = conn.Queryx(`
 					 INSERT INTO tokens VALUES
 						(default, $1, $2, $3, $4, $5)
 					 `, portfolioId, token.Amount, token.Address,
-		tokenAPI.TokenTicker, tokenAPI.TokenDecimals)
+			tokenAPI.TokenTicker, tokenAPI.TokenDecimals)
+
+		if err != nil {
+			_, e := conn.Queryx(`
+								UPDATE tokens SET
+									  amount = $1
+								  WHERE portfolio_id = $2 AND address = $3
+									`, token.Amount, portfolioId, token.Address)
+			if e != nil {
+				return e
+			}
+		}
+	}
 
 	return nil
 }

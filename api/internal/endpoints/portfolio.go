@@ -56,16 +56,16 @@ func DeletePortfolio(c *fiber.Ctx) error {
 	return nil
 }
 
-func AddNewTokenToPortfolio(c *fiber.Ctx) error {
-	token := new(models.TokenInput)
-	if err := c.BodyParser(token); err != nil {
-		c.Status(503)
+func AddNewTokensToPortfolio(c *fiber.Ctx) error {
+	tokens := new(models.TokensInput)
+	if err := c.BodyParser(tokens); err != nil {
+		return fiber.ErrBadRequest
 	}
 	pId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return err
+		return fiber.ErrBadRequest
 	}
-	err = crud.AddNewToken(pId, *token)
+	err = crud.AddNewTokens(pId, *tokens)
 	if err != nil {
 		return err
 	}
@@ -75,13 +75,15 @@ func AddNewTokenToPortfolio(c *fiber.Ctx) error {
 func UpdatePortfolio(c *fiber.Ctx) error {
 	pId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return nil
+		return fiber.ErrBadRequest
 	}
 	portfolio := new(models.PortfolioInput)
 	if err := c.BodyParser(portfolio); err != nil {
-		return nil
+		return fiber.ErrBadRequest
 	}
-
+	if portfolio.ChainId == 0 || portfolio.Tokens == nil || len(portfolio.Name) == 0 {
+		return fiber.ErrBadRequest
+	}
 	err = crud.Update(pId, *portfolio)
 	if err != nil {
 		return err

@@ -1,0 +1,30 @@
+services:
+  app:
+    container_name: main-app-api
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - postgresql
+#      - migrations
+
+  postgresql:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: docker/postgresql/Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=busa2012
+      - POSTGRES_USER=timofey
+      - POSTGRES_DB=portfolio_db
+    ports:
+      - 5433:5432
+#  migrations:
+#    container_name: db-migrations
+#    build:
+#      context: .
+#      dockerfile: docker/migrations/Dockerfile

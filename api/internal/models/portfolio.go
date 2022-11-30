@@ -22,16 +22,28 @@ type PortfolioInput struct {
 
 // Schema for future migrations
 var Schema = `
-	CREATE TABLE IF NOT EXISTS portfolios (
-	    id SERIAL PRIMARY KEY,
-	    chain_id INTEGER,
-	    name TEXT
+	create table portfolios
+	(
+    id       serial
+        primary key,
+    chain_id integer,
+    name     text
 	);
-	CREATE TABLE IF NOT EXISTS tokens_addreses (
-	    id SERIAL PRIMARY KEY,
-	    portfolio_id INT REFERENCES portfolios(id) ON DELETE CASCADE,
-	    amount TEXT,
-		address VARCHAR(48),
-		ticker VARCHAR(16)                                
+	create table if not exists tokens
+	(
+    id           integer default nextval('tokens_addreses_id_seq'::regclass) not null
+        constraint tokens_addreses_pkey
+            primary key,
+    portfolio_id integer
+        constraint tokens_addreses_portfolio_id_fkey
+            references portfolios
+            on delete cascade,
+    amount       text,
+    address      varchar(48)
+        unique,
+    ticker       varchar(16)
+        unique,
+    decimals     integer
 	);
+
 `

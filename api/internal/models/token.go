@@ -10,6 +10,10 @@ type TokenInput struct {
 	Amount  string `json:"amount"`
 }
 
+type TokensInput struct {
+	Tokens []TokenInput `json:"tokens"`
+}
+
 type TokenInPortfolio struct {
 	Ticker   string `json:"ticker"`
 	Address  string `json:"address"`
