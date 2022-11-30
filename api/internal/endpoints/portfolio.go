@@ -55,6 +55,22 @@ func DeletePortfolio(c *fiber.Ctx) error {
 	return nil
 }
 
+func AddNewTokenToPortfolio(c *fiber.Ctx) error {
+	token := new(models.TokenInput)
+	if err := c.BodyParser(token); err != nil {
+		c.Status(503)
+	}
+	pId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return err
+	}
+	err = crud.AddNewToken(pId, *token)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PrepareTransaction(c *fiber.Ctx) {
 
 }

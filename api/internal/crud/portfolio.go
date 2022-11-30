@@ -151,12 +151,30 @@ func Update(portfolio models.PortfolioInput) error {
 	return nil
 }
 
-func AddNewToken(token models.TokenInput) error {
+func AddNewToken(portfolioId int, token models.TokenInput) error {
 	// PATCH
-	_, err := repositories.CreateConnection()
+	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return err
 	}
+
+	portfolio, err := Read(portfolioId)
+
+	if err != nil {
+		return err
+	}
+
+	tokenAPI, err := getTokenDetails(portfolio.ChainId, token.Address)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Queryx(`
+					 INSERT INTO tokens VALUES
+						(default, $1, $2, $3, $4, $5)
+					 `, portfolioId, token.Amount, token.Address,
+		tokenAPI.TokenTicker, tokenAPI.TokenDecimals)
+
 	return nil
 }
 
