@@ -4,7 +4,6 @@ import (
 	"awesomeProject/api/internal/etc"
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
-	"github.com/jmoiron/sqlx"
 	"go/types"
 )
 
@@ -142,10 +141,36 @@ func ReadAll() ([]models.PortfolioResponse, error) {
 	return []models.PortfolioResponse{}, types.Error{Msg: "Got empty portfolio, check if there is data in DB"}
 }
 
-func Update(db *sqlx.DB, portfolio models.PortfolioDB) error {
+func Update(portfolio models.PortfolioInput) error {
+	// PUT
+	_, err := repositories.CreateConnection()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func Delete(db *sqlx.DB, id int) error {
+func AddNewToken(token models.TokenInput) error {
+	// PATCH
+	_, err := repositories.CreateConnection()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Delete(id int) error {
+	conn, err := repositories.CreateConnection()
+	if err != nil {
+		return err
+	}
+	_, err = conn.Queryx(`
+					  DELETE FROM portfolios
+						WHERE id = $1;
+					  `, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }

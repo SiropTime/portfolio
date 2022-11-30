@@ -43,6 +43,18 @@ func PostPortfolio(c *fiber.Ctx) error {
 	return nil
 }
 
+func DeletePortfolio(c *fiber.Ctx) error {
+	pId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return err
+	}
+	err = crud.Delete(pId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PrepareTransaction(c *fiber.Ctx) {
 
 }
