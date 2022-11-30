@@ -3,11 +3,13 @@ FROM golang:1.19-alpine
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 
+
+
 WORKDIR /app
 COPY go.mod go.sum ./
 
 RUN go mod download
-COPY . .
+COPY . ./app
 
 RUN go build -o main .
 EXPOSE 8080
