@@ -49,7 +49,7 @@ func addTokens(conn *sqlx.DB, portfolioId int, chainId int, tokens []models.Toke
 	return nil
 }
 
-func Create(portfolio models.PortfolioInput) error {
+func CreatePortfolio(portfolio models.PortfolioInput) error {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func Create(portfolio models.PortfolioInput) error {
 	return nil
 }
 
-func Read(id int) (models.PortfolioResponse, error) {
+func ReadPortfolio(id int) (models.PortfolioResponse, error) {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return models.PortfolioResponse{}, err
@@ -115,7 +115,7 @@ func Read(id int) (models.PortfolioResponse, error) {
 	return portfolio, nil
 }
 
-func ReadAll() ([]models.PortfolioResponse, error) {
+func ReadAllPortfolios() ([]models.PortfolioResponse, error) {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func ReadAll() ([]models.PortfolioResponse, error) {
 
 	var resultList []models.PortfolioResponse
 	for _, p := range listPortfolios {
-		portfolio, err := Read(p.Id)
+		portfolio, err := ReadPortfolio(p.Id)
 		if err != nil {
 			continue
 		}
@@ -147,7 +147,7 @@ func ReadAll() ([]models.PortfolioResponse, error) {
 	return []models.PortfolioResponse{}, types.Error{Msg: "Got empty portfolio, check if there is data in DB"}
 }
 
-func Update(portfolioId int, portfolio models.PortfolioInput) error {
+func UpdatePortfolio(portfolioId int, portfolio models.PortfolioInput) error {
 	// PUT
 	conn, err := repositories.CreateConnection()
 	if err != nil {
@@ -176,7 +176,7 @@ func AddNewTokens(portfolioId int, tokens models.TokensInput) error {
 		return err
 	}
 
-	portfolio, err := Read(portfolioId)
+	portfolio, err := ReadPortfolio(portfolioId)
 
 	if err != nil {
 		return err
@@ -209,7 +209,7 @@ func AddNewTokens(portfolioId int, tokens models.TokensInput) error {
 	return nil
 }
 
-func Delete(id int) error {
+func DeletePortfolio(id int) error {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return err

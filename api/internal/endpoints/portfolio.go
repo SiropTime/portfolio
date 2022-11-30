@@ -14,7 +14,7 @@ func GetPortfolio(c *fiber.Ctx) error {
 		return err
 	}
 
-	portRes, err := crud.Read(pId)
+	portRes, err := crud.ReadPortfolio(pId)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func GetPortfolio(c *fiber.Ctx) error {
 }
 
 func GetAllPortfolios(c *fiber.Ctx) error {
-	portfolios, err := crud.ReadAll()
+	portfolios, err := crud.ReadAllPortfolios()
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func PostPortfolio(c *fiber.Ctx) error {
 	if err := c.BodyParser(portfolio); err != nil {
 		c.Status(503)
 	}
-	err := crud.Create(*portfolio)
+	err := crud.CreatePortfolio(*portfolio)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func DeletePortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	err = crud.Delete(pId)
+	err = crud.DeletePortfolio(pId)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func UpdatePortfolio(c *fiber.Ctx) error {
 	if portfolio.ChainId == 0 || portfolio.Tokens == nil || len(portfolio.Name) == 0 {
 		return fiber.ErrBadRequest
 	}
-	err = crud.Update(pId, *portfolio)
+	err = crud.UpdatePortfolio(pId, *portfolio)
 	if err != nil {
 		return err
 	}
