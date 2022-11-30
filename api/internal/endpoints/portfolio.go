@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"awesomeProject/api/internal/crud"
+	"awesomeProject/api/internal/models"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
@@ -31,6 +32,14 @@ func GetAllPortfolios(c *fiber.Ctx) error {
 }
 
 func PostPortfolio(c *fiber.Ctx) error {
+	portfolio := new(models.PortfolioInput)
+	if err := c.BodyParser(portfolio); err != nil {
+		c.Status(503)
+	}
+	err := crud.Create(*portfolio)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

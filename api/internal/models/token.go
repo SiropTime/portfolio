@@ -18,11 +18,11 @@ type TokenInPortfolio struct {
 }
 
 type TokenDB struct {
-	portfolioId int    `db:"portfolio_id"`
-	amount      string `db:"amount"`
-	address     string `db:"address"`
-	ticker      string `db:"ticker"`
-	decimals    int16  `db:"decimals"`
+	PortfolioId int    `db:"portfolio_id"`
+	Amount      string `db:"amount"`
+	Address     string `db:"address"`
+	Ticker      string `db:"ticker"`
+	Decimals    int16  `db:"decimals"`
 }
 
 type TokenRequestAPI struct {
@@ -35,7 +35,7 @@ type TokenAPI struct {
 	ChainId              int      `json:"chain_id"`
 	Tags                 []string `json:"tags"`
 	TokenContractAddress string   `json:"token_contract_address"`
-	TokenDecimals        int      `json:"token_decimals"`
+	TokenDecimals        int16    `json:"token_decimals"`
 	TokenImageUrl        string   `json:"token_image_url"`
 	TokenName            string   `json:"token_name"`
 	TokenTicker          string   `json:"token_ticker"`

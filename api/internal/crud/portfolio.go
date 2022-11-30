@@ -1,27 +1,71 @@
 package crud
 
 import (
+	"awesomeProject/api/internal/etc"
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
 	"github.com/jmoiron/sqlx"
 	"go/types"
-	"log"
 )
 
-func Create(portfolio models.PortfolioDB) error {
-	conn, err := repositories.CreateConnection()
+func getTokenDetails(chainId int, tokenAddress string) (models.TokenAPI, error) {
+	tokensAPI, err := etc.GetTokensAPI(chainId)
 	if err != nil {
-		log.Fatalln("Can't create connection with DB")
-
+		return models.TokenAPI{}, err
 	}
+	for _, token := range tokensAPI {
+		if token.TokenContractAddress == tokenAddress {
+			return token, nil
+		}
+	}
+	return models.TokenAPI{}, types.Error{Msg: "Couldn't find token with this address in current chain. Please, check one of the parameters"}
 
-	_, err = conn.Exec(`	
-				INSERT INTO portfolios (chain_id) VALUES (?)
-	`, portfolio.ChainId)
+}
+
+func Create(portfolio models.PortfolioInput) error {
+	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return err
 	}
 
+	portfolioResult := conn.QueryRowx(`	
+				INSERT INTO portfolios (chain_id, name) VALUES ($1, $2)
+				RETURNING *;
+	`, portfolio.ChainId, portfolio.Name)
+	if err != nil {
+		return err
+	}
+
+	var portfolioDB models.PortfolioDB
+
+	if portfolioResult != nil {
+		err = portfolioResult.StructScan(&portfolioDB)
+	} else {
+		return types.Error{Msg: "Can't create connection to DB"}
+	}
+
+	for _, token := range portfolio.Tokens {
+		var tokenDB models.TokenDB
+		tokenDB.PortfolioId = portfolioDB.Id
+		tokenDB.Address, tokenDB.Amount = token.Address, token.Address
+		_t, err := getTokenDetails(portfolioDB.ChainId, tokenDB.Address)
+		if err != nil {
+			return err
+		}
+		tokenDB.Decimals = _t.TokenDecimals
+		tokenDB.Ticker = _t.TokenTicker
+
+		_, err = conn.Queryx(`
+						INSERT INTO tokens VALUES
+						   (default, $1, $2, $3, $4, $5)
+                         `,
+			tokenDB.PortfolioId, tokenDB.Amount,
+			tokenDB.Address, tokenDB.Ticker,
+			tokenDB.Decimals)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
