@@ -40,6 +40,7 @@ func PostPortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	c.Status(201)
 	return nil
 }
 
@@ -71,6 +72,20 @@ func AddNewTokenToPortfolio(c *fiber.Ctx) error {
 	return nil
 }
 
-func PrepareTransaction(c *fiber.Ctx) {
+func UpdatePortfolio(c *fiber.Ctx) error {
+	pId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return nil
+	}
+	portfolio := new(models.PortfolioInput)
+	if err := c.BodyParser(portfolio); err != nil {
+		return nil
+	}
 
+	err = crud.Update(pId, *portfolio)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

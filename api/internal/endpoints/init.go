@@ -8,4 +8,5 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/portfolios", PostPortfolio)
 	app.Delete("/portfolios/:id", DeletePortfolio)
 	app.Patch("/portfolios/:id/addToken", AddNewTokenToPortfolio)
+	app.Put("/portfolios/:id", UpdatePortfolio)
 }

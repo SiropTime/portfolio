@@ -4,6 +4,7 @@ import (
 	"awesomeProject/api/internal/etc"
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
+	"github.com/jmoiron/sqlx"
 	"go/types"
 )
 
@@ -19,6 +20,32 @@ func getTokenDetails(chainId int, tokenAddress string) (models.TokenAPI, error) 
 	}
 	return models.TokenAPI{}, types.Error{Msg: "Couldn't find token with this address in current chain. Please, check one of the parameters"}
 
+}
+
+func addTokens(conn *sqlx.DB, portfolioId int, chainId int, tokens []models.TokenInput) error {
+	for _, token := range tokens {
+		var tokenDB models.TokenDB
+		tokenDB.PortfolioId = portfolioId
+		tokenDB.Address, tokenDB.Amount = token.Address, token.Amount
+		_t, err := getTokenDetails(chainId, tokenDB.Address)
+		if err != nil {
+			return err
+		}
+		tokenDB.Decimals = _t.TokenDecimals
+		tokenDB.Ticker = _t.TokenTicker
+
+		_, err = conn.Queryx(`
+						INSERT INTO tokens VALUES
+						   (default, $1, $2, $3, $4, $5)
+                         `,
+			tokenDB.PortfolioId, tokenDB.Amount,
+			tokenDB.Address, tokenDB.Ticker,
+			tokenDB.Decimals)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func Create(portfolio models.PortfolioInput) error {
@@ -42,29 +69,7 @@ func Create(portfolio models.PortfolioInput) error {
 	} else {
 		return types.Error{Msg: "Can't create connection to DB"}
 	}
-
-	for _, token := range portfolio.Tokens {
-		var tokenDB models.TokenDB
-		tokenDB.PortfolioId = portfolioDB.Id
-		tokenDB.Address, tokenDB.Amount = token.Address, token.Amount
-		_t, err := getTokenDetails(portfolioDB.ChainId, tokenDB.Address)
-		if err != nil {
-			return err
-		}
-		tokenDB.Decimals = _t.TokenDecimals
-		tokenDB.Ticker = _t.TokenTicker
-
-		_, err = conn.Queryx(`
-						INSERT INTO tokens VALUES
-						   (default, $1, $2, $3, $4, $5)
-                         `,
-			tokenDB.PortfolioId, tokenDB.Amount,
-			tokenDB.Address, tokenDB.Ticker,
-			tokenDB.Decimals)
-		if err != nil {
-			return err
-		}
-	}
+	err = addTokens(conn, portfolioDB.Id, portfolioDB.ChainId, portfolio.Tokens)
 	return nil
 }
 
@@ -141,13 +146,25 @@ func ReadAll() ([]models.PortfolioResponse, error) {
 	return []models.PortfolioResponse{}, types.Error{Msg: "Got empty portfolio, check if there is data in DB"}
 }
 
-func Update(portfolio models.PortfolioInput) error {
+func Update(portfolioId int, portfolio models.PortfolioInput) error {
 	// PUT
-	_, err := repositories.CreateConnection()
+	conn, err := repositories.CreateConnection()
 	if err != nil {
 		return err
 	}
 
+	_, err = conn.Queryx(`
+				      UPDATE portfolios
+					  SET chain_id = $1, name = $2
+					  WHERE id = $3
+				      `, portfolio.ChainId, portfolio.Name, portfolioId)
+	if err != nil {
+		return err
+	}
+	err = addTokens(conn, portfolioId, portfolio.ChainId, portfolio.Tokens)
+	if err != nil {
+		return nil
+	}
 	return nil
 }
 
