@@ -12,26 +12,6 @@ type PortfolioResponse struct {
 	//Total   int                `json:"total"`
 }
 
-type TokenInChain struct {
-	Address string `json:"address"`
-	Price   int64  `json:"price"`
-}
-
-type TokenInPortfolio struct {
-	Symbol  string `json:"symbol"`
-	Address string `json:"address"`
-	Price   int64  `json:"price"`
-	Amount  int64  `json:"Amount"`
-}
-
-type TokenDB struct {
-	portfolioId int    `db:"portfolio_id"`
-	amount      int64  `db:"amount"`
-	address     string `db:"address"`
-	symbol      string `db:"symbol"`
-	price       int64  `db:"price"`
-}
-
 // Schema for future migrations
 var Schema = `
 	CREATE TABLE IF NOT EXISTS portfolios (
@@ -41,7 +21,7 @@ var Schema = `
 	CREATE TABLE IF NOT EXISTS tokens_addreses (
 	    id SERIAL PRIMARY KEY,
 	    portfolio_id INT REFERENCES portfolios(id) ON DELETE CASCADE,
-	    amount BIGINT,
+	    amount TEXT,
 		address VARCHAR(48),
 		symbol VARCHAR(16)                                
 	);

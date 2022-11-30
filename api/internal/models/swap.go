@@ -19,3 +19,9 @@ type ChainsRequest struct {
 	StatusCode int        `json:"status_code"`
 	Result     ChainsList `json:"result"`
 }
+
+type AnyRequest struct {
+	Success    bool `json:"success"`
+	StatusCode int  `json:"status_code"`
+	Result     any  `json:"result"`
+}
