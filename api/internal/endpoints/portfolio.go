@@ -13,8 +13,8 @@ func GetPortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	portRes, err := crud.Read(pId)
 
+	portRes, err := crud.Read(pId)
 	if err != nil {
 		return err
 	}

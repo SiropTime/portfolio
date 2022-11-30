@@ -47,7 +47,7 @@ func Create(portfolio models.PortfolioInput) error {
 	for _, token := range portfolio.Tokens {
 		var tokenDB models.TokenDB
 		tokenDB.PortfolioId = portfolioDB.Id
-		tokenDB.Address, tokenDB.Amount = token.Address, token.Address
+		tokenDB.Address, tokenDB.Amount = token.Address, token.Amount
 		_t, err := getTokenDetails(portfolioDB.ChainId, tokenDB.Address)
 		if err != nil {
 			return err

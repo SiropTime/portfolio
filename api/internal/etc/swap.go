@@ -39,7 +39,7 @@ func GetChains() ([]models.Chain, error) {
 
 func GetTokensAPI(chainId int) ([]models.TokenAPI, error) {
 	req, err := http.NewRequest(http.MethodGet,
-		fmt.Sprintf(constants.SwapAPIURL+"/tokens?chainId=%d0", chainId),
+		fmt.Sprintf(constants.SwapAPIURL+"/tokens?chainId=%d", chainId),
 		nil)
 	if err != nil {
 		return nil, err
