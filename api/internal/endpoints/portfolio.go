@@ -8,19 +8,26 @@ import (
 )
 
 func GetPortfolio(c *fiber.Ctx) error {
-	//body := getChains()
-	//err := c.SendString(strconv.Itoa(body.Chains[0].ChainId))
 	pId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return err
 	}
-	portRes := crud.Read(pId)
+	portRes, err := crud.Read(pId)
 
 	if err != nil {
 		return err
 	}
 
 	return json.NewEncoder(c.Type("json", "utf-8").Response().BodyWriter()).Encode(portRes)
+}
+
+func GetAllPortfolios(c *fiber.Ctx) error {
+	portfolios, err := crud.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	return json.NewEncoder(c.Type("json", "utf-8").Response().BodyWriter()).Encode(portfolios)
 }
 
 func PostPortfolio(c *fiber.Ctx) error {

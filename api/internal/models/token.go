@@ -5,6 +5,11 @@ type TokenPrice struct {
 	Price   int64  `json:"price"`
 }
 
+type TokenInput struct {
+	Address string `json:"address"`
+	Amount  string `json:"amount"`
+}
+
 type TokenInPortfolio struct {
 	Ticker   string `json:"ticker"`
 	Address  string `json:"address"`

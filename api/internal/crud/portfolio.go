@@ -4,6 +4,7 @@ import (
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
 	"github.com/jmoiron/sqlx"
+	"go/types"
 	"log"
 )
 
@@ -24,10 +25,10 @@ func Create(portfolio models.PortfolioDB) error {
 	return nil
 }
 
-func Read(id int) models.PortfolioResponse {
+func Read(id int) (models.PortfolioResponse, error) {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
-		log.Fatalln("Can't create connection with DB")
+		return models.PortfolioResponse{}, err
 	}
 
 	// Getting portfolio
@@ -37,6 +38,8 @@ func Read(id int) models.PortfolioResponse {
 	var portfolioDB models.PortfolioDB
 	if portfolioResult != nil {
 		err = portfolioResult.StructScan(&portfolioDB)
+	} else {
+		return models.PortfolioResponse{}, types.Error{Msg: "Can't create connection to DB"}
 	}
 
 	// Getting tokens inside the portfolio
@@ -57,13 +60,42 @@ func Read(id int) models.PortfolioResponse {
 	var portfolio models.PortfolioResponse
 	portfolio.Id = portfolioDB.Id
 	portfolio.ChainId = portfolioDB.ChainId
+	portfolio.Name = portfolioDB.Name
 	portfolio.Tokens = tokens
 
-	return portfolio
+	return portfolio, nil
 }
 
-func ReadAll() []models.PortfolioDB {
-	return []models.PortfolioDB{}
+func ReadAll() ([]models.PortfolioResponse, error) {
+	conn, err := repositories.CreateConnection()
+	if err != nil {
+		return nil, err
+	}
+	prePortfolios, err := conn.Queryx(`
+		SELECT * FROM portfolios;
+	`)
+
+	var listPortfolios []models.PortfolioDB
+
+	for prePortfolios.Next() {
+		_pdb := models.PortfolioDB{}
+		err = prePortfolios.StructScan(&_pdb)
+		listPortfolios = append(listPortfolios, _pdb)
+	}
+
+	var resultList []models.PortfolioResponse
+	for _, p := range listPortfolios {
+		portfolio, err := Read(p.Id)
+		if err != nil {
+			continue
+		}
+		resultList = append(resultList, portfolio)
+	}
+
+	if resultList != nil {
+		return resultList, nil
+	}
+	return []models.PortfolioResponse{}, types.Error{Msg: "Got empty portfolio, check if there is data in DB"}
 }
 
 func Update(db *sqlx.DB, portfolio models.PortfolioDB) error {
