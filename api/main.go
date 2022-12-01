@@ -1,19 +1,19 @@
 package main
 
 import (
-	"awesomeProject/api/internal/endpoints"
-	"awesomeProject/api/internal/models"
-	"awesomeProject/api/pkg/repositories"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"log"
+	"portfolioTask/api/internal/endpoints"
+	"portfolioTask/api/internal/models"
+	"portfolioTask/api/pkg/repositories"
 )
 
 func main() {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader: "Testing Portfolio",
-		AppName:      "Portfolio v.0.0.1",
+		AppName:      "Portfolio v.0.0.2",
 		ErrorHandler: endpoints.ErrorHandler,
 	})
 	app.Use(logger.New())
@@ -27,6 +27,5 @@ func main() {
 		log.Fatalln("Can't listen to port 8080 or app can't start.")
 	}
 
-	conn, err := repositories.CreateConnection()
-	err = repositories.FirstInitialization(conn, models.Schema)
+	err = repositories.FirstInitialization(models.Schema)
 }

@@ -1,15 +1,15 @@
 package endpoints
 
 import (
-	"awesomeProject/api/internal/crud"
-	"awesomeProject/api/internal/etc"
-	"awesomeProject/api/internal/models"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/shopspring/decimal"
 	"go/types"
 	"log"
 	"math/big"
+	"portfolioTask/api/internal/crud"
+	"portfolioTask/api/internal/etc"
+	"portfolioTask/api/internal/models"
 	"strconv"
 )
 
@@ -124,6 +124,13 @@ func calculatePortfolioWithAmount(portfolio models.PortfolioProportionsResponse,
 			portfolioResponse.Tokens = append(portfolioResponse.Tokens, models.TokenQuote{
 				FinalAmount:  quoteResult.ToTokenAmount,
 				EstimatedGas: quoteResult.EstimatedGas,
+				Address:      token.Address,
+				Ticker:       token.Ticker,
+			})
+		} else {
+			portfolioResponse.Tokens = append(portfolioResponse.Tokens, models.TokenQuote{
+				FinalAmount:  queryForQuote.Amount,
+				EstimatedGas: 0,
 				Address:      token.Address,
 				Ticker:       token.Ticker,
 			})

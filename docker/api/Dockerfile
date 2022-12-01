@@ -1,17 +1,6 @@
-FROM golang:1.19-alpine
+FROM golang:1.19-alpine AS build
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache bash git openssh
-
-
-
-WORKDIR /app
-COPY go.mod go.sum ./
-
-RUN go mod download
-COPY . ./app
-
-RUN go build -o main .
-EXPOSE 8080
-
-CMD ["./main"]
+WORKDIR /go/src/portfolioTask
+COPY . .
+RUN go build -o bin/server api/main.go
+CMD ["./bin/server"]

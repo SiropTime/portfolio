@@ -1,8 +1,6 @@
 package etc
 
 import (
-	"awesomeProject/api/internal/models"
-	"awesomeProject/api/pkg/constants"
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -10,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"portfolioTask/api/internal/models"
+	"portfolioTask/api/pkg/constants"
 )
 
 // File for interaction with API
@@ -137,3 +137,5 @@ func GetQuoteApi(query models.QuoteQuery) (*models.QuoteResultAPI, error) {
 	}
 	return &quoteBody.Result, nil
 }
+
+// Function

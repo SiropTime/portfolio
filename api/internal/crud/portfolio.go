@@ -1,12 +1,12 @@
 package crud
 
 import (
-	"awesomeProject/api/internal/etc"
-	"awesomeProject/api/internal/models"
-	"awesomeProject/api/pkg/repositories"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"go/types"
+	"portfolioTask/api/internal/etc"
+	"portfolioTask/api/internal/models"
+	"portfolioTask/api/pkg/repositories"
 )
 
 func GetTokenDetails(chainId int, tokenAddress string) (models.TokenAPI, error) {

@@ -1,10 +1,11 @@
 package repositories
 
 import (
-	"awesomeProject/api/pkg/constants"
+	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"portfolioTask/api/pkg/constants"
 )
 
 func CreateConnection() (*sqlx.DB, error) {
@@ -17,8 +18,19 @@ func CreateConnection() (*sqlx.DB, error) {
 	return conn, err
 }
 
-func FirstInitialization(db *sqlx.DB, schema string) error {
-	_, err := db.Exec(schema)
+func FirstInitialization(schema string) error {
+	conn, err := CreateConnection()
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't connect to database"}
+	}
+	_, err = conn.Exec(schema)
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't accept migrations"}
+	}
 
 	return err
 }

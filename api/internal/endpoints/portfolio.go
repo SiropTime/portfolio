@@ -1,10 +1,10 @@
 package endpoints
 
 import (
-	"awesomeProject/api/internal/crud"
-	"awesomeProject/api/internal/models"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
+	"portfolioTask/api/internal/crud"
+	"portfolioTask/api/internal/models"
 	"strconv"
 )
 

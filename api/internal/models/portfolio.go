@@ -53,10 +53,8 @@ var Schema = `
             references portfolios
             on delete cascade,
     amount       text,
-    address      varchar(48)
-        unique,
-    ticker       varchar(16)
-        unique,
+    address      varchar(48),
+    ticker       varchar(16),
     decimals     integer
 	);
 
