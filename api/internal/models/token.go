@@ -75,3 +75,10 @@ type PriceResult struct {
 	LastUpdate string            `json:"last_update"`
 	Prices     map[string]string `json:"prices"`
 }
+
+type TokenQuote struct {
+	FinalAmount  string `json:"final_price"`
+	EstimatedGas int    `json:"estimated_gas"`
+	Address      string `json:"address"`
+	Ticker       string `json:"ticker"`
+}

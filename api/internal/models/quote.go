@@ -19,3 +19,23 @@ type CalculatedToken struct {
 	Address string `json:"address"`
 	Amount  string `json:"amount"`
 }
+
+type QuoteQuery struct {
+	FromTokenAddress string
+	ToTokenAddress   string
+	Amount           string
+	ChainId          int
+	GasPrice         int
+}
+
+type QuoteResponseAPI struct {
+	Success    bool           `json:"success"`
+	StatusCode int            `json:"status_code"`
+	Result     QuoteResultAPI `json:"result"`
+}
+
+type QuoteResultAPI struct {
+	EstimatedGas    int    `json:"estimated_gas"`
+	FromTokenAmount string `json:"from_token_amount"`
+	ToTokenAmount   string `json:"to_token_amount"`
+}

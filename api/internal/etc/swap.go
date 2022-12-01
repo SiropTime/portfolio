@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -44,7 +45,7 @@ func GetNativeTokenInfo(chainId int) (models.TokenAPI, error) {
 		return models.TokenAPI{}, err
 	}
 	for _, token := range tokens {
-		if token.TokenContractAddress == constants.NATIVE_ADDRESS {
+		if token.TokenContractAddress == constants.NativeAddress {
 			return token, nil
 		}
 	}
@@ -89,4 +90,50 @@ func GetTokensPrices(chainId int) (map[string]string, error) {
 	}
 
 	return tokensBody.Result.Prices, nil
+}
+
+func GetQuoteApi(query models.QuoteQuery) (*models.QuoteResultAPI, error) {
+	req, err := http.NewRequest(http.MethodGet,
+		fmt.Sprintf(constants.SwapAPIURL+
+			"/quote?fromTokenAddress=%s&toTokenAddress=%s&amount=%s&chainId=%d&gasPrice=%d",
+			query.FromTokenAddress, query.ToTokenAddress, query.Amount,
+			query.ChainId, query.GasPrice),
+		nil)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't create request to API",
+		}
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't send request to API",
+		}
+	}
+	defer res.Body.Close()
+	var quoteBody models.QuoteResponseAPI
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't proceed body or not valid body of response",
+		}
+	}
+
+	err = json.Unmarshal(body, &quoteBody)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "Bad JSON from external API or not successfully response",
+		}
+	}
+	if !quoteBody.Success {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: string(body),
+		}
+	}
+	return &quoteBody.Result, nil
 }

@@ -27,6 +27,13 @@ type PortfolioProportionsResponse struct {
 	TokensProportions []TokenProportions
 }
 
+type PortfolioAfterQuote struct {
+	Id      int          `json:"id"`
+	ChainId int          `json:"chain_id"`
+	Name    string       `json:"name"`
+	Tokens  []TokenQuote `json:"tokens"`
+}
+
 // Schema for future migrations
 var Schema = `
 	create table portfolios

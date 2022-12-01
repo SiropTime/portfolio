@@ -35,6 +35,7 @@ func PostPortfolio(c *fiber.Ctx) error {
 	portfolio := new(models.PortfolioInput)
 	if err := c.BodyParser(portfolio); err != nil {
 		c.Status(503)
+		return err
 	}
 	err := crud.CreatePortfolio(*portfolio)
 	if err != nil {

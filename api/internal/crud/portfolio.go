@@ -9,7 +9,7 @@ import (
 	"go/types"
 )
 
-func getTokenDetails(chainId int, tokenAddress string) (models.TokenAPI, error) {
+func GetTokenDetails(chainId int, tokenAddress string) (models.TokenAPI, error) {
 	tokensAPI, err := etc.GetTokensAPI(chainId)
 	if err != nil {
 		return models.TokenAPI{}, err
@@ -28,7 +28,7 @@ func addTokens(conn *sqlx.DB, portfolioId int, chainId int, tokens []models.Toke
 		var tokenDB models.TokenDB
 		tokenDB.PortfolioId = portfolioId
 		tokenDB.Address, tokenDB.Amount = token.Address, token.Amount
-		_t, err := getTokenDetails(chainId, tokenDB.Address)
+		_t, err := GetTokenDetails(chainId, tokenDB.Address)
 		if err != nil {
 			return err
 		}
@@ -183,7 +183,7 @@ func AddNewTokens(portfolioId int, tokens models.TokensInput) error {
 	}
 	tokensList := tokens.Tokens
 	for _, token := range tokensList {
-		tokenAPI, err := getTokenDetails(portfolio.ChainId, token.Address)
+		tokenAPI, err := GetTokenDetails(portfolio.ChainId, token.Address)
 		if err != nil {
 			return err
 		}

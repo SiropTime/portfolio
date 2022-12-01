@@ -13,6 +13,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Patch("/portfolios/:id/addTokens", AddNewTokensToPortfolio)
 	app.Put("/portfolios/:id", UpdatePortfolio)
 	app.Get("/portfolios/:id/proportions", GetPortfolioProportions)
+	app.Get("/portfolios/:id/count", GetCountedPortfolio)
 }
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
