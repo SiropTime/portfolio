@@ -5,6 +5,7 @@ import (
 	"awesomeProject/api/internal/models"
 	"awesomeProject/api/pkg/repositories"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"log"
 )
 
@@ -15,7 +16,7 @@ func main() {
 		AppName:      "Portfolio v.0.0.1",
 		ErrorHandler: endpoints.ErrorHandler,
 	})
-
+	app.Use(logger.New())
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("test index")
 	})

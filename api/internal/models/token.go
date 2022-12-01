@@ -17,7 +17,7 @@ type TokensInput struct {
 type TokenInPortfolio struct {
 	Ticker   string `json:"ticker"`
 	Address  string `json:"address"`
-	Decimals int16  `json:"decimals"`
+	Decimals uint   `json:"decimals"`
 	Amount   string `json:"amount"`
 }
 
@@ -26,7 +26,7 @@ type TokenDB struct {
 	Amount      string `db:"amount"`
 	Address     string `db:"address"`
 	Ticker      string `db:"ticker"`
-	Decimals    int16  `db:"decimals"`
+	Decimals    uint   `db:"decimals"`
 }
 
 type TokenRequestAPI struct {
@@ -39,14 +39,19 @@ type TokenAPI struct {
 	ChainId              int      `json:"chain_id"`
 	Tags                 []string `json:"tags"`
 	TokenContractAddress string   `json:"token_contract_address"`
-	TokenDecimals        int16    `json:"token_decimals"`
+	TokenDecimals        uint     `json:"token_decimals"`
 	TokenImageUrl        string   `json:"token_image_url"`
 	TokenName            string   `json:"token_name"`
 	TokenTicker          string   `json:"token_ticker"`
 }
 
 type TokenPriceAPI struct {
-	Success    bool              `json:"success"`
-	StatusCode int               `json:"status_code"`
-	Result     map[string]string `json:"result"`
+	Success    bool        `json:"success"`
+	StatusCode int         `json:"status_code"`
+	Result     PriceResult `json:"result"`
+}
+
+type PriceResult struct {
+	LastUpdate string            `json:"last_update"`
+	Prices     map[string]string `json:"prices"`
 }

@@ -5,6 +5,7 @@ import (
 	"awesomeProject/api/pkg/constants"
 	"encoding/json"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -35,6 +36,19 @@ func GetChains() ([]models.Chain, error) {
 		return nil, err
 	}
 	return chainsBody.Result.Chains, nil
+}
+
+func GetNativeTokenInfo(chainId int) (models.TokenAPI, error) {
+	tokens, err := GetTokensAPI(chainId)
+	if err != nil {
+		return models.TokenAPI{}, err
+	}
+	for _, token := range tokens {
+		if token.TokenContractAddress == constants.NATIVE_ADDRESS {
+			return token, nil
+		}
+	}
+	return models.TokenAPI{}, fiber.ErrNotFound
 }
 
 func GetTokensAPI(chainId int) ([]models.TokenAPI, error) {
@@ -74,5 +88,5 @@ func GetTokensPrices(chainId int) (map[string]string, error) {
 		return nil, err
 	}
 
-	return tokensBody.Result, nil
+	return tokensBody.Result.Prices, nil
 }
