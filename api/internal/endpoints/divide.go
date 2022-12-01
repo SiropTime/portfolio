@@ -6,6 +6,7 @@ import (
 	"awesomeProject/api/internal/models"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
+	"github.com/shopspring/decimal"
 	"go/types"
 	"log"
 	"math/big"
@@ -25,28 +26,25 @@ func getTokenPrice(token models.TokenInPortfolio, tokensPrices map[string]string
 	return "", nil
 }
 
-func sumTokensPriceInPortfolio(portfolio models.PortfolioResponse) (*big.Float, error) {
+func sumTokensPriceInPortfolio(portfolio models.PortfolioResponse) (string, error) {
 	tokensPrices, err := etc.GetTokensPrices(portfolio.ChainId)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	nativeToken, err := etc.GetNativeTokenInfo(portfolio.ChainId)
-	sum := new(big.Float).SetMantExp(big.NewFloat(0), -int(nativeToken.TokenDecimals))
+	sum := decimal.NewFromInt(0)
 	for _, token := range portfolio.Tokens {
-		_price, success := new(big.Float).SetString(tokensPrices[token.Address])
-		realPrice := new(big.Float).SetMantExp(_price, -int(nativeToken.TokenDecimals))
+		_price, success := big.NewInt(0).SetString(tokensPrices[token.Address], 10)
 		if !success {
-			return nil, types.Error{Msg: "There's no valid price string in data"}
+			return "", types.Error{Msg: "Not valid price type"}
 		}
-		_amount, success := new(big.Float).SetString(token.Amount)
-		realAmount := new(big.Float).SetMantExp(_amount, -int(token.Decimals))
-		_temp := new(big.Float).SetInt64(0).SetPrec(nativeToken.TokenDecimals)
-		_temp.Mul(realPrice, realAmount)
-		sum = big.NewFloat(0.0).SetPrec(nativeToken.TokenDecimals).Add(sum, _temp)
-
+		realPrice := decimal.NewFromBigInt(_price, -int32(nativeToken.TokenDecimals))
+		_amount, success := big.NewInt(0).SetString(token.Amount, 10)
+		realAmount := decimal.NewFromBigInt(_amount, -int32(token.Decimals))
+		sum = sum.Add(realPrice.Mul(realAmount))
 	}
 
-	return sum, nil
+	return sum.String(), nil
 }
 
 func GetPortfolioProportions(c *fiber.Ctx) error {
@@ -67,5 +65,5 @@ func GetPortfolioProportions(c *fiber.Ctx) error {
 	}
 	//c.SendString(sum.String())
 	//return nil
-	return json.NewEncoder(c.Type("json", "utf-8").Response().BodyWriter()).Encode(map[string]*big.Float{"sum": sum})
+	return json.NewEncoder(c.Type("json", "utf-8").Response().BodyWriter()).Encode(map[string]string{"sum": sum})
 }
