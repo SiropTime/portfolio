@@ -1,5 +1,7 @@
 package models
 
+import "github.com/shopspring/decimal"
+
 type TokenPrice struct {
 	Address string `json:"address"`
 	Price   int64  `json:"price"`
@@ -49,6 +51,24 @@ type TokenPriceAPI struct {
 	Success    bool        `json:"success"`
 	StatusCode int         `json:"status_code"`
 	Result     PriceResult `json:"result"`
+}
+
+type TokensInfo struct {
+	Total       decimal.Decimal `json:"total"`
+	NativeToken TokenAPI        `json:"native_token"`
+	Tokens      []TokenRealData `json:"tokens"`
+}
+
+type TokenRealData struct {
+	Ticker     string
+	Address    string
+	TotalPrice decimal.Decimal
+}
+
+type TokenProportions struct {
+	Ticker     string          `json:"ticker"`
+	Address    string          `json:"address"`
+	Proportion decimal.Decimal `json:"proportion"`
 }
 
 type PriceResult struct {

@@ -20,6 +20,13 @@ type PortfolioInput struct {
 	Tokens  []TokenInput `json:"tokens"`
 }
 
+type PortfolioProportionsResponse struct {
+	Id                int    `json:"id"`
+	ChainId           int    `json:"chain_id"`
+	Name              string `json:"name"`
+	TokensProportions []TokenProportions
+}
+
 // Schema for future migrations
 var Schema = `
 	create table portfolios
