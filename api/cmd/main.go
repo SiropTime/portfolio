@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"log"
-	error2 "portfolioTask/api/internal/httpServer/error"
+	errors "portfolioTask/api/internal/httpServer/error"
 	"portfolioTask/api/internal/portfolios/delivery"
 )
 
@@ -13,7 +13,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ServerHeader: "Testing Portfolio",
 		AppName:      "Portfolio v.0.0.3",
-		ErrorHandler: error2.ErrorHandler,
+		ErrorHandler: errors.ErrorHandler,
 	})
 	app.Use(logger.New())
 	app.Get("/", func(c *fiber.Ctx) error {

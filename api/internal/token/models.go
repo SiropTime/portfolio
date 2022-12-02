@@ -52,6 +52,7 @@ type PriceResult struct {
 
 type QuoteToken struct {
 	FinalAmount  string `json:"final_price"`
+	NativePrice  string `json:"native_price"`
 	EstimatedGas int    `json:"estimated_gas"`
 	Address      string `json:"address"`
 	Ticker       string `json:"ticker"`
