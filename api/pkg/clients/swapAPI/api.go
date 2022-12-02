@@ -1,39 +1,36 @@
-package etc
+package swapAPI
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
-	"portfolioTask/api/internal/models"
-	"portfolioTask/api/pkg/constants"
+	"portfolioTask/api/internal/cconst"
 )
 
-// File for interaction with API
-
-func GetNativeTokenInfo(chainId int) (models.TokenAPI, error) {
+func GetNativeTokenInfo(chainId int) (TokenAPI, error) {
 	tokens, err := GetTokensAPI(chainId)
 	if err != nil {
-		return models.TokenAPI{}, err
+		return TokenAPI{}, err
 	}
 	for _, token := range tokens {
-		if token.TokenContractAddress == constants.NativeAddress {
+		if token.TokenContractAddress == cconst.NativeAddress {
 			return token, nil
 		}
 	}
-	return models.TokenAPI{}, fiber.ErrNotFound
+	return TokenAPI{}, fiber.ErrNotFound
 }
 
-func GetTokensAPI(chainId int) ([]models.TokenAPI, error) {
+func GetTokensAPI(chainId int) ([]TokenAPI, error) {
 	client := resty.New()
-	res, err := client.R().Get(fmt.Sprintf(constants.SwapAPIURL+"/tokens?chainId=%d", chainId))
+	res, err := client.R().Get(fmt.Sprintf(cconst.SwapAPIURL+"/tokens?chainId=%d", chainId))
 	if err != nil {
 		return nil, &fiber.Error{
 			Code:    fiber.StatusInternalServerError,
 			Message: "Can't send request to external API",
 		}
 	}
-	var tokensBody models.TokenRequestAPI
+	var tokensBody TokenRequestAPI
 	err = json.Unmarshal(res.Body(), &tokensBody)
 	if err != nil {
 		return nil, &fiber.Error{
@@ -54,14 +51,14 @@ func GetTokensAPI(chainId int) ([]models.TokenAPI, error) {
 
 func GetTokensPrices(chainId int) (map[string]string, error) {
 	client := resty.New()
-	res, err := client.R().Get(fmt.Sprintf(constants.SwapAPIURL+"/prices?chainId=%d", chainId))
+	res, err := client.R().Get(fmt.Sprintf(cconst.SwapAPIURL+"/prices?chainId=%d", chainId))
 	if err != nil {
 		return nil, &fiber.Error{
 			Code:    fiber.StatusInternalServerError,
 			Message: "Can't send request to external API",
 		}
 	}
-	var tokensBody models.TokenPriceAPI
+	var tokensBody TokenPriceAPI
 
 	err = json.Unmarshal(res.Body(), &tokensBody)
 	if err != nil {
@@ -81,9 +78,9 @@ func GetTokensPrices(chainId int) (map[string]string, error) {
 	return tokensBody.Result.Prices, nil
 }
 
-func GetQuoteApi(query models.QuoteQuery) (*models.QuoteResultAPI, error) {
+func GetQuoteApi(query QuoteQuery) (*QuoteResultAPI, error) {
 	client := resty.New()
-	res, err := client.R().Get(fmt.Sprintf(constants.SwapAPIURL+
+	res, err := client.R().Get(fmt.Sprintf(cconst.SwapAPIURL+
 		"/quote?fromTokenAddress=%s&toTokenAddress=%s&amount=%s&chainId=%d&gasPrice=%d",
 		query.FromTokenAddress, query.ToTokenAddress, query.Amount,
 		query.ChainId, query.GasPrice))
@@ -95,7 +92,7 @@ func GetQuoteApi(query models.QuoteQuery) (*models.QuoteResultAPI, error) {
 		}
 	}
 
-	var quoteBody models.QuoteResponseAPI
+	var quoteBody QuoteResponseAPI
 
 	err = json.Unmarshal(res.Body(), &quoteBody)
 	if err != nil {

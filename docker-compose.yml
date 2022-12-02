@@ -1,7 +1,7 @@
 services:
 
   postgresql:
-    container_name: postgres-portfolio
+    container_name: postgres-portfolios
     image: postgres:14
     restart: always
     env_file:

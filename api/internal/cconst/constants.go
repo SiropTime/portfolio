@@ -1,4 +1,4 @@
-package constants
+package cconst
 
 import (
 	"fmt"
