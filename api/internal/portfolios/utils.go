@@ -82,8 +82,6 @@ func CalculatePortfolioWithAmount(portfolio ProportionsResponsePortfolio,
 		return nil, err
 	}
 
-	nativeToken, err := swapAPI.GetNativeTokenInfo(portfolio.ChainId)
-
 	fromRealAmount := decimal.NewFromBigInt(_amount, -int32(tokenFromAPI.TokenDecimals))
 	portfolioResponse := AfterQuotePortfolio{
 		Id:      portfolio.Id,
@@ -95,7 +93,7 @@ func CalculatePortfolioWithAmount(portfolio ProportionsResponsePortfolio,
 		queryForQuote := swapAPI.QuoteQuery{
 			ChainId:          portfolio.ChainId,
 			GasPrice:         gasPrice,
-			Amount:           amountForCurrentToken.Shift(int32(nativeToken.TokenDecimals)).BigInt().String(),
+			Amount:           amountForCurrentToken.Shift(int32(tokenFromAPI.TokenDecimals)).BigInt().String(),
 			FromTokenAddress: fromAddress,
 			ToTokenAddress:   proportionToken.Address,
 		}
@@ -124,4 +122,59 @@ func CalculatePortfolioWithAmount(portfolio ProportionsResponsePortfolio,
 
 	}
 	return &portfolioResponse, nil
+}
+
+func FormTransaction(portfolioInput *ProportionsResponsePortfolio, query swapAPI.SwapQuery) (*AfterSwapPortfolio, error) {
+
+	_amount, success := new(big.Int).SetString(query.Amount, 10)
+	if !success {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "Not valid amount to parse into swap request",
+		}
+	}
+
+	tokenFromAPI, err := repository.GetTokenDetails(
+		portfolioInput.ChainId,
+		query.FromTokenAddress,
+	)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusNotFound,
+			Message: "Can't find token in current chain",
+		}
+	}
+	fromRealAmount := decimal.NewFromBigInt(_amount, -int32(tokenFromAPI.TokenDecimals))
+	portfolioResponse := new(AfterSwapPortfolio)
+	portfolioResponse.Id, portfolioResponse.Name, portfolioResponse.ChainId = portfolioInput.Id, portfolioInput.Name, portfolioInput.ChainId
+
+	for _, tokenProportions := range portfolioInput.TokensProportions {
+		amountForCurrentToken := fromRealAmount.Mul(tokenProportions.Proportion)
+		queryForSwap := swapAPI.SwapQuery{
+			ChainId:          portfolioInput.ChainId,
+			FromTokenAddress: query.FromTokenAddress,
+			ToTokenAddress:   tokenProportions.Address,
+			FromAddress:      query.FromAddress,
+			Amount:           amountForCurrentToken.Shift(int32(tokenFromAPI.TokenDecimals)).BigInt().String(),
+			Slippage:         query.Slippage,
+		}
+		if queryForSwap.FromTokenAddress == queryForSwap.ToTokenAddress {
+			continue
+		}
+		swapResult, e := swapAPI.GetSwapApi(queryForSwap)
+		if e != nil {
+			return nil, err
+		}
+		swapTx := swapResult.Tx
+		portfolioResponse.Tokens = append(portfolioResponse.Tokens, tokens.AfterSwapToken{
+			GasPrice: swapTx.GasPrice,
+			Gas:      swapTx.Gas,
+			From:     swapTx.From,
+			To:       swapTx.To,
+			Value:    swapTx.Value,
+			Data:     swapTx.Data,
+		})
+	}
+
+	return portfolioResponse, nil
 }

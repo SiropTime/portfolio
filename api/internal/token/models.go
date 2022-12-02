@@ -63,3 +63,12 @@ type CalculatedToken struct {
 	Address string `json:"address"`
 	Amount  string `json:"amount"`
 }
+
+type AfterSwapToken struct {
+	Data     string `json:"data"`
+	From     string `json:"from"`
+	Gas      int    `json:"gas"`
+	GasPrice string `json:"gasPrice"`
+	To       string `json:"to"`
+	Value    string `json:"value"`
+}

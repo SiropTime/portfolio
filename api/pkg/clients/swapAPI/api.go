@@ -110,4 +110,36 @@ func GetQuoteApi(query QuoteQuery) (*QuoteResultAPI, error) {
 	return &quoteBody.Result, nil
 }
 
+func GetSwapApi(query SwapQuery) (*SwapResultAPI, error) {
+	client := resty.New()
+	res, err := client.R().Get(fmt.Sprintf(cconst.SwapAPIURL+
+		"/swap?fromTokenAddress=%s&toTokenAddress=%s&amount=%s&chainId=%d&slippage=%d&fromAddress=%s",
+		query.FromTokenAddress, query.ToTokenAddress, query.Amount,
+		query.ChainId, query.Slippage, query.FromAddress))
+
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't send request to external API",
+		}
+	}
+
+	var swapBody SwapResponseAPI
+
+	err = json.Unmarshal(res.Body(), &swapBody)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "Bad JSON from external API or not successfully response",
+		}
+	}
+	if !swapBody.Success {
+		return nil, &fiber.Error{
+			Code:    swapBody.StatusCode,
+			Message: "Got error from external API. See status code",
+		}
+	}
+	return &swapBody.Result, nil
+}
+
 // Function

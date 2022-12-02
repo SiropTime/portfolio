@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"portfolioTask/api/internal/portfolios"
-	"portfolioTask/api/internal/portfolios/repository"
+	rep "portfolioTask/api/internal/portfolios/repository"
 	tokens "portfolioTask/api/internal/token"
+	"portfolioTask/api/pkg/clients/swapAPI"
 	"strconv"
 )
 
@@ -15,7 +16,7 @@ func GetPortfolio(c *fiber.Ctx) error {
 		return err
 	}
 
-	portRes, err := token.ReadPortfolio(pId)
+	portRes, err := rep.ReadPortfolio(pId)
 	if err != nil {
 		return err
 	}
@@ -24,7 +25,7 @@ func GetPortfolio(c *fiber.Ctx) error {
 }
 
 func GetAllPortfolios(c *fiber.Ctx) error {
-	portfoliosResponse, err := token.ReadAllPortfolios()
+	portfoliosResponse, err := rep.ReadAllPortfolios()
 	if err != nil {
 		return err
 	}
@@ -38,7 +39,7 @@ func PostPortfolio(c *fiber.Ctx) error {
 		c.Status(503)
 		return err
 	}
-	portfolioResponse, err := token.CreatePortfolio(*portfolio)
+	portfolioResponse, err := rep.CreatePortfolio(*portfolio)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func DeletePortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	err = token.DeletePortfolio(pId)
+	err = rep.DeletePortfolio(pId)
 	if err != nil {
 		return err
 	}
@@ -74,12 +75,12 @@ func AddNewTokensToPortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.ErrBadRequest
 	}
-	err = token.AddNewTokens(pId, *tokensList)
+	err = rep.AddNewTokens(pId, *tokensList)
 	if err != nil {
 		return err
 	}
 
-	_p, err := token.ReadPortfolio(pId)
+	_p, err := rep.ReadPortfolio(pId)
 	if err != nil {
 		return &fiber.Error{
 			Code:    404,
@@ -118,7 +119,7 @@ func UpdatePortfolio(c *fiber.Ctx) error {
 	if portfolio.ChainId == 0 || portfolio.Tokens == nil || len(portfolio.Name) == 0 {
 		return fiber.ErrBadRequest
 	}
-	err = token.UpdatePortfolio(pId, *portfolio)
+	err = rep.UpdatePortfolio(pId, *portfolio)
 	if err != nil {
 		return err
 	}
@@ -132,7 +133,7 @@ func GetPortfolioProportions(c *fiber.Ctx) error {
 		c.Status(fiber.StatusBadRequest)
 		return err
 	}
-	portfolio, err := token.ReadPortfolio(pId)
+	portfolio, err := rep.ReadPortfolio(pId)
 	if err != nil {
 		c.Status(fiber.StatusNotFound)
 		return err
@@ -164,7 +165,7 @@ func GetCountedPortfolio(c *fiber.Ctx) error {
 			Message: "GasPrice is not represented correctly. Try another value",
 		}
 	}
-	portfolio, err := token.ReadPortfolio(pId)
+	portfolio, err := rep.ReadPortfolio(pId)
 	if err != nil {
 		return &fiber.Error{Code: 404, Message: "This portfolios doesn't exist"}
 	}
@@ -182,4 +183,53 @@ func GetCountedPortfolio(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(quotePortfolio)
+}
+
+func GetTransactions(c *fiber.Ctx) error {
+	pId, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return err
+	}
+	amount := c.Query("amount")
+	fromAddress := c.Query("fromAddress")
+	fromTokenAddress := c.Query("fromTokenAddress")
+	_slippage := c.Query("slippage")
+	slippage, err := strconv.Atoi(_slippage)
+	if len(amount) == 0 || len(fromAddress) == 0 {
+		return &fiber.Error{Code: 404, Message: "Query parameters are not found. Check documentation"}
+	}
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "Slippage is not represented correctly. Try another value",
+		}
+	}
+	portfolioToParse, err := rep.ReadPortfolio(pId)
+	if err != nil {
+		return err
+	}
+	portfolioToSend, err := portfolios.CalculatePortfolioProportions(portfolioToParse)
+	if err != nil {
+		return err
+	}
+	portfolioResponse, err := portfolios.FormTransaction(portfolioToSend,
+		swapAPI.SwapQuery{
+			FromTokenAddress: fromTokenAddress,
+			FromAddress:      fromAddress,
+			Amount:           amount,
+			Slippage:         slippage,
+			ChainId:          portfolioToSend.ChainId,
+			ToTokenAddress:   "",
+		})
+	if err != nil {
+		return err
+	}
+
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't marshal portfolio to JSON",
+		}
+	}
+	return c.JSON(portfolioResponse)
 }

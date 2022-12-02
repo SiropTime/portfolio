@@ -12,5 +12,5 @@ func SetupRoutes(app *fiber.App) {
 	app.Put("/portfolios/:id", UpdatePortfolio)
 	app.Get("/portfolios/:id/proportions", GetPortfolioProportions)
 	app.Get("/portfolios/:id/count", GetCountedPortfolio)
-	//app.Get("/portfolios/:id/transactions", GetTransactions)
+	app.Get("/portfolios/:id/transactions", GetTransactions)
 }

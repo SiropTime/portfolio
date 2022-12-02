@@ -52,3 +52,34 @@ type TokensInfo struct {
 	NativeToken TokenAPI              `json:"native_token"`
 	Tokens      []token.RealDataToken `json:"tokens"`
 }
+
+type SwapResponseAPI struct {
+	Success    bool          `json:"success"`
+	StatusCode int           `json:"status_code"`
+	Result     SwapResultAPI `json:"result"`
+}
+
+type SwapResultAPI struct {
+	FromTokenAmount string          `json:"from_token_amount"`
+	ToTokenAmount   string          `json:"to_token_amount"`
+	Tx              SwapTxResultAPI `json:"tx"`
+}
+
+type SwapTxResultAPI struct {
+	Data      string `json:"data"`
+	From      string `json:"from"`
+	Gas       int    `json:"gas"`
+	GasPrice  string `json:"gasPrice"`
+	Gas_Price string `json:"gas_price"`
+	To        string `json:"to"`
+	Value     string `json:"value"`
+}
+
+type SwapQuery struct {
+	FromTokenAddress string
+	ToTokenAddress   string
+	Amount           string
+	ChainId          int
+	FromAddress      string
+	Slippage         int
+}
