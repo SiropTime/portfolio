@@ -49,10 +49,10 @@ func addTokens(conn *sqlx.DB, portfolioId int, chainId int, tokens []models.Toke
 	return nil
 }
 
-func CreatePortfolio(portfolio models.PortfolioInput) error {
+func CreatePortfolio(portfolio models.PortfolioInput) (*models.PortfolioProportionsResponse, error) {
 	conn, err := repositories.CreateConnection()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	portfolioResult := conn.QueryRowx(`	
@@ -60,7 +60,7 @@ func CreatePortfolio(portfolio models.PortfolioInput) error {
 				RETURNING *;
 	`, portfolio.ChainId, portfolio.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var portfolioDB models.PortfolioDB
@@ -68,10 +68,24 @@ func CreatePortfolio(portfolio models.PortfolioInput) error {
 	if portfolioResult != nil {
 		err = portfolioResult.StructScan(&portfolioDB)
 	} else {
-		return types.Error{Msg: "Can't create connection to DB"}
+		return nil, types.Error{Msg: "Can't create connection to DB"}
 	}
 	err = addTokens(conn, portfolioDB.Id, portfolioDB.ChainId, portfolio.Tokens)
-	return nil
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusNotAcceptable,
+			Message: "Can't correctly insert tokens in portfolio",
+		}
+	}
+	_p, err := ReadPortfolio(portfolioDB.Id)
+	portfolioResponse, err := etc.CalculatePortfolioProportions(_p)
+	if err != nil {
+		return nil, &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "New portfolio wasn't created",
+		}
+	}
+	return portfolioResponse, nil
 }
 
 func ReadPortfolio(id int) (models.PortfolioResponse, error) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"portfolioTask/api/internal/crud"
+	"portfolioTask/api/internal/etc"
 	"portfolioTask/api/internal/models"
 	"strconv"
 )
@@ -37,11 +38,18 @@ func PostPortfolio(c *fiber.Ctx) error {
 		c.Status(503)
 		return err
 	}
-	err := crud.CreatePortfolio(*portfolio)
+	portfolioResponse, err := crud.CreatePortfolio(*portfolio)
 	if err != nil {
 		return err
 	}
 	c.Status(201)
+	err = c.JSON(portfolioResponse)
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't marshal portfolio to JSON",
+		}
+	}
 	return nil
 }
 
@@ -70,6 +78,31 @@ func AddNewTokensToPortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	_p, err := crud.ReadPortfolio(pId)
+	if err != nil {
+		return &fiber.Error{
+			Code:    404,
+			Message: "Can't find portfolio with this id",
+		}
+	}
+	portfolioResponse, err := etc.CalculatePortfolioProportions(_p)
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't calculate new proportions for portfolio",
+		}
+	}
+
+	c.Status(fiber.StatusAccepted)
+	err = c.JSON(portfolioResponse)
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: "Can't marshal portfolio to JSON",
+		}
+	}
+
 	return nil
 }
 

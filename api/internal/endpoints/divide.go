@@ -4,79 +4,12 @@ import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/shopspring/decimal"
-	"go/types"
-	"log"
 	"math/big"
 	"portfolioTask/api/internal/crud"
 	"portfolioTask/api/internal/etc"
 	"portfolioTask/api/internal/models"
 	"strconv"
 )
-
-func getTokenPrice(token models.TokenInPortfolio) (string, error) {
-	tokenAmount, _, err := big.ParseFloat(token.Amount, 10, token.Decimals, big.AwayFromZero)
-	if err != nil {
-		return "", err
-	}
-	log.Println(tokenAmount.String())
-	return "", nil
-}
-
-func sumTokensPriceInPortfolio(portfolio models.PortfolioResponse, tokensPrices map[string]string) (*models.TokensInfo, error) {
-	nativeToken, err := etc.GetNativeTokenInfo(portfolio.ChainId)
-	if err != nil {
-		return nil, err
-	}
-	tokensInfo := models.TokensInfo{NativeToken: nativeToken}
-	sum := decimal.NewFromInt(0)
-	for _, token := range portfolio.Tokens {
-		_price, success := big.NewInt(0).SetString(tokensPrices[token.Address], 10)
-		if !success {
-			return nil, types.Error{Msg: "Not valid price type"}
-		}
-		realPrice := decimal.NewFromBigInt(_price, -int32(nativeToken.TokenDecimals))
-		_amount, success := big.NewInt(0).SetString(token.Amount, 10)
-		realAmount := decimal.NewFromBigInt(_amount, -int32(token.Decimals))
-		_temp := realPrice.Mul(realAmount)
-		tokensInfo.Tokens = append(tokensInfo.Tokens, models.TokenRealData{
-			Ticker:     token.Ticker,
-			Address:    token.Address,
-			TotalPrice: _temp,
-		})
-		sum = sum.Add(_temp)
-	}
-	tokensInfo.Total = sum
-	return &tokensInfo, nil
-}
-
-func calculatePortfolioProportions(portfolio models.PortfolioResponse) (*models.PortfolioProportionsResponse, error) {
-	tokensPrices, err := etc.GetTokensPrices(portfolio.ChainId)
-	portfolioResponse := models.PortfolioProportionsResponse{
-		Name:    portfolio.Name,
-		Id:      portfolio.Id,
-		ChainId: portfolio.ChainId,
-	}
-	if err != nil {
-		return nil, err
-	}
-	tokensInfo, err := sumTokensPriceInPortfolio(portfolio, tokensPrices)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, token := range tokensInfo.Tokens {
-		proportion := token.TotalPrice.Div(tokensInfo.Total)
-
-		portfolioResponse.TokensProportions = append(portfolioResponse.TokensProportions, models.TokenProportions{
-			Ticker:     token.Ticker,
-			Address:    token.Address,
-			Proportion: proportion,
-		})
-	}
-
-	return &portfolioResponse, nil
-
-}
 
 func calculatePortfolioWithAmount(portfolio models.PortfolioProportionsResponse,
 	amount string, fromAddress string, gasPrice int) (*models.PortfolioAfterQuote, error) {
@@ -152,7 +85,7 @@ func GetPortfolioProportions(c *fiber.Ctx) error {
 		return err
 	}
 
-	portfolioResponse, err := calculatePortfolioProportions(portfolio)
+	portfolioResponse, err := etc.CalculatePortfolioProportions(portfolio)
 	if err != nil {
 		return err
 	}
@@ -182,7 +115,7 @@ func GetCountedPortfolio(c *fiber.Ctx) error {
 	if err != nil {
 		return &fiber.Error{Code: 404, Message: "This portfolio doesn't exist"}
 	}
-	calculatedPortfolio, err := calculatePortfolioProportions(portfolio)
+	calculatedPortfolio, err := etc.CalculatePortfolioProportions(portfolio)
 	if err != nil {
 		return err
 	}
