@@ -149,22 +149,6 @@ paths:
     get:
       consumes:
       - '*/*'
-      description: Getting the status of server
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Checking if server is alive
-      tags:
-      - root
-  /portfolio:
-    get:
-      consumes:
-      - '*/*'
       description: Get all portfolios in DB with their tokens with amount
       produces:
       - application/json
@@ -187,11 +171,6 @@ paths:
       - application/json
       description: Create new portfolio with tokens
       parameters:
-      - description: Portfolio id
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Portfolio
         in: body
         name: portfolio
@@ -212,7 +191,7 @@ paths:
       summary: Create new portfolio
       tags:
       - portfolio
-  /portfolio/{id}:
+  /{id}:
     delete:
       consumes:
       - '*/*'
@@ -291,7 +270,7 @@ paths:
       summary: Update portfolio
       tags:
       - portfolio
-  /portfolio/{id}/count:
+  /{id}/count:
     get:
       consumes:
       - '*/*'
@@ -335,7 +314,7 @@ paths:
       summary: Get portfolio after quote
       tags:
       - portfolio
-  /portfolio/{id}/proportions:
+  /{id}/proportions:
     get:
       consumes:
       - '*/*'
@@ -360,7 +339,7 @@ paths:
       summary: Get portfolio proportions
       tags:
       - portfolio
-  /portfolio/{id}/tokens:
+  /{id}/tokens:
     patch:
       consumes:
       - application/json
@@ -393,7 +372,7 @@ paths:
       summary: Add new tokens to portfolio
       tags:
       - portfolio
-  /portfolio/{id}/transactions:
+  /{id}/transactions:
     get:
       consumes:
       - '*/*'

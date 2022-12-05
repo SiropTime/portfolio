@@ -22,30 +22,6 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
-                "description": "Getting the status of server",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "root"
-                ],
-                "summary": "Checking if server is alive",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/portfolio": {
-            "get": {
                 "description": "Get all portfolios in DB with their tokens with amount",
                 "consumes": [
                     "*/*"
@@ -89,13 +65,6 @@ const docTemplate = `{
                 "summary": "Create new portfolio",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Portfolio id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Portfolio",
                         "name": "portfolio",
                         "in": "body",
@@ -121,7 +90,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/portfolio/{id}": {
+        "/{id}": {
             "get": {
                 "description": "Get portfolio by id with amount of tokens",
                 "consumes": [
@@ -240,7 +209,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/portfolio/{id}/count": {
+        "/{id}/count": {
             "get": {
                 "description": "Get portfolio with pre-calculated tokens values for transaction and gas by portfolio id and token with amount from which will transaction be made",
                 "consumes": [
@@ -302,7 +271,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/portfolio/{id}/proportions": {
+        "/{id}/proportions": {
             "get": {
                 "description": "Get portfolio with tokens represented with proportions by id",
                 "consumes": [
@@ -340,7 +309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/portfolio/{id}/tokens": {
+        "/{id}/tokens": {
             "patch": {
                 "description": "Add new tokens to portfolio by id",
                 "consumes": [
@@ -390,7 +359,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/portfolio/{id}/transactions": {
+        "/{id}/transactions": {
             "get": {
                 "description": "Get transactions data for metamask for current portfolio with amount of token and wallet address",
                 "consumes": [

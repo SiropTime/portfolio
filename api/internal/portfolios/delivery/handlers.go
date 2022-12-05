@@ -59,7 +59,6 @@ func GetAllPortfolios(c *fiber.Ctx) error {
 // @Description Create new portfolio with tokens
 // @Tags portfolio
 // @Accept  application/json
-// @Param id path int true "Portfolio id"
 // @Param portfolio body portfolios.InputPortfolio true "Portfolio"
 // @Produce  json
 // @Success 201 {object} portfolios.ProportionsResponsePortfolio
