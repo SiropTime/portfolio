@@ -3,12 +3,26 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"log"
 	"os"
 	errors "portfolioTask/api/internal/httpServer/error"
+	"portfolioTask/api/internal/httpServer/utils"
 	"portfolioTask/api/internal/portfolios/delivery"
+	_ "portfolioTask/docs"
 )
 
+// @title Portfolio API
+// @version 1.0
+// @description This is a portfolio API server. There are endpoints for creating, updating, deleting, getting portfolios and making swaps and quotes with them.
+// @contact.name API developer
+// @contact.url https://t.me/KlenoviySIr
+// @contact.email KlenoviySir@yandex.ru
+
+// @host localhost:8080
+// @BasePath /portfolios
+// @schemes http
 func main() {
 
 	app := fiber.New(fiber.Config{
@@ -17,9 +31,9 @@ func main() {
 		ErrorHandler: errors.ErrorHandler,
 	})
 	app.Use(logger.New())
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("test index")
-	})
+	app.Use(recover.New())
+	app.Get("/", utils.HealthCheck)
+	app.Get("/docs/*", swagger.HandlerDefault)
 	delivery.SetupRoutes(app)
 	err := app.Listen(os.Getenv("APP_PORT"))
 

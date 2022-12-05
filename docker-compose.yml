@@ -46,8 +46,4 @@ services:
 
 volumes:
     postgresql:
-#  migrations:
-#    container_name: db-migrations
-#    build:
-#      context: .
-#      dockerfile: docker/migrations/Dockerfile
+
