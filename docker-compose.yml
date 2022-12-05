@@ -19,7 +19,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  migrate:
+    image: migrate/migrate
+    container_name: migrate-portfolios
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path=/migrations", "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable", "up"]
+    depends_on:
+      postgresql:
+        condition: service_healthy
   app:
     container_name: main-app-api
     build:
