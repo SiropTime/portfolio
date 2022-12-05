@@ -166,14 +166,19 @@ func FormTransaction(portfolioInput *ProportionsResponsePortfolio, query swapAPI
 			return nil, err
 		}
 		swapTx := swapResult.Tx
-		portfolioResponse.Tokens = append(portfolioResponse.Tokens, tokens.AfterSwapToken{
-			GasPrice: swapTx.GasPrice,
-			Gas:      swapTx.Gas,
-			From:     swapTx.From,
-			To:       swapTx.To,
-			Value:    swapTx.Value,
-			Data:     swapTx.Data,
-		})
+		portfolioResponse.Tokens = append(portfolioResponse.Tokens, tokens.SwapWrapperForToken{
+			Tx: tokens.AfterSwapToken{
+				GasPrice: swapTx.GasPrice,
+				Gas:      swapTx.Gas,
+				From:     swapTx.From,
+				To:       swapTx.To,
+				Value:    swapTx.Value,
+				Data:     swapTx.Data,
+			},
+			Address: tokenProportions.Address,
+			Ticker:  tokenProportions.Ticker,
+		},
+		)
 	}
 
 	return portfolioResponse, nil

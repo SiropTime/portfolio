@@ -53,8 +53,8 @@ type AfterQuotePortfolio struct {
 }
 
 type AfterSwapPortfolio struct {
-	Id      int                    `json:"id"`
-	ChainId int                    `json:"chain_id"`
-	Name    string                 `json:"name"`
-	Tokens  []token.AfterSwapToken `json:"tokens"`
+	Id      int                         `json:"id"`
+	ChainId int                         `json:"chain_id"`
+	Name    string                      `json:"name"`
+	Tokens  []token.SwapWrapperForToken `json:"tokens"`
 }

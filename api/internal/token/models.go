@@ -72,3 +72,9 @@ type AfterSwapToken struct {
 	To       string `json:"to"`
 	Value    string `json:"value"`
 }
+
+type SwapWrapperForToken struct {
+	Ticker  string         `json:"ticker"`
+	Address string         `json:"address"`
+	Tx      AfterSwapToken `json:"tx"`
+}

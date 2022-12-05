@@ -225,11 +225,5 @@ func GetTransactions(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err != nil {
-		return &fiber.Error{
-			Code:    fiber.StatusInternalServerError,
-			Message: "Can't marshal portfolio to JSON",
-		}
-	}
 	return c.JSON(portfolioResponse)
 }
